@@ -1,0 +1,85 @@
+name: QGIS ARM64 Native (No Docker)
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [ master ]
+
+jobs:
+  build:
+    runs-on: ubuntu-22.04-arm
+
+    steps:
+      - name: Checkout QGIS
+        uses: actions/checkout@v4
+
+      - name: Install dependencies
+        run: |
+          sudo apt update
+
+          sudo apt install -y \
+            build-essential cmake pkg-config \
+            flex bison \
+            python3 python3-pip python3-dev \
+            git wget
+
+          sudo apt install -y \
+            qtbase6-dev qttools6-dev \
+            qt6-base-dev qt6-declarative-dev \
+            qt6-wayland qt6-wayland-dev \
+            libqt6svg-dev \
+            libqt6networkauth-dev
+
+          sudo apt install -y \
+            libgdal-dev \
+            libproj-dev \
+            libgeos-dev \
+            libsqlite3-dev \
+            libspatialite-dev \
+            libspatialindex-dev \
+            libexpat1-dev \
+            libqwt-qt6-dev \
+            libqscintilla2-qt6-dev \
+            libqca-dev \
+            qtkeychain-dev \
+            libzip-dev \
+            protobuf-compiler
+
+          sudo apt install -y \
+            python3-sip \
+            python3-pyqt6 \
+            python3-numpy
+
+      - name: Build QGIS
+        run: |
+          mkdir -p build
+          cd build
+
+          cmake .. \
+            -DCMAKE_BUILD_TYPE=Release \
+            -DCMAKE_INSTALL_PREFIX=/usr/local \
+            -DWITH_QT6=ON \
+            -DWITH_BINDINGS=ON \
+            -DWITH_GRASS=OFF \
+            -DWITH_3D=ON \
+            -DWITH_DESKTOP=ON
+
+          make -j$(nproc)
+          sudo make install
+
+      - name: Package runtime
+        run: |
+          mkdir -p out/qgis-arm64-runtime/lib out/qgis-arm64-runtime/share
+
+          cp /usr/local/bin/qgis out/qgis-arm64-runtime/
+          cp /usr/local/lib/libqgis_core.so out/qgis-arm64-runtime/lib/
+          cp /usr/local/lib/libqgis_gui.so  out/qgis-arm64-runtime/lib/
+          cp -r /usr/local/share/qgis out/qgis-arm64-runtime/share/
+
+          tar -czf qgis-arm64-runtime.tar.gz -C out qgis-arm64-runtime
+
+      - name: Upload artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: qgis-arm64-runtime
+          path: qgis-arm64-runtime.tar.gz
