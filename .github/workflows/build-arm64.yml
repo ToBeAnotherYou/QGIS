@@ -45,6 +45,7 @@ jobs:
             libqscintilla2-qt5-dev \
             libqca-qt5-2-dev \
             libzip-dev \
+            libexiv2-dev \
             protobuf-compiler
 
           # PyQGIS (Qt5)
