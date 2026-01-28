@@ -66,6 +66,7 @@ jobs:
             -DWITH_QTKEYCHAIN=OFF \
             -DWITH_BINDINGS=ON \
             -DWITH_GRASS=OFF \
+            -DWITH_PDAL=OFF \
             -DWITH_3D=ON \
             -DWITH_DESKTOP=ON
 
